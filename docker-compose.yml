@@ -1,0 +1,10 @@
+# UNBIASLY: Docker Infrastructure
+# ============================
+
+# TODO: Define service orchestration:
+# version: '4'
+# services:
+#   backend: Build backend/ Dockerfile
+#   frontend: Build frontend/ Dockerfile
+#   db: Postgres/Redis for caching/persistence
+#   proxy: Nginx for routing
