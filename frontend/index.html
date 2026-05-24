@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bias Detector</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="script.js" defer></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Magnifying Glass Cursor CSS -->
+    <style>
+        /* Light Mode Cursor */
+        * {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') 10 10, auto !important;
+        }
+        /* Dark Mode Cursor */
+        html.dark * {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') 10 10, auto !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm transition-colors duration-300">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            
+            <!-- Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md shadow-indigo-100 dark:shadow-none">
+                    <i class="fa-solid fa-brain-circuit text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Unbiasly AI</h1>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 font-medium text-sm text-slate-600 dark:text-slate-300">
+                <a href="#analyzer" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Analyzer</a>
+                <a href="#about" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">How it Works</a>
+                
+                <!-- Dark Mode Toggle Button -->
+                <button id="themeToggle" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="w-full flex-grow">
+        
+        <!-- SECTION 1: THE ANALYZER -->
+        <section id="analyzer" class="min-h-screen flex items-center py-12 scroll-mt-20">
+            <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                
+                <!-- Left Column: Input Panel -->
+                <div class="flex flex-col space-y-4">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none transition-colors duration-300">
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Analyze Text for Bias</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Paste the text or article segment you want to evaluate. Our AI will check for cognitive, political, gender, or cultural biases.</p>
+                        
+                        <form id="biasForm" class="space-y-4">
+                            <div>
+                                <textarea id="textInput" rows="8" class="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:bg-white dark:focus:bg-slate-800 transition-all text-sm resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-white" placeholder="Type or paste your text here (minimum 10 characters)..." required></textarea>
+                                <div class="flex justify-between items-center mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                    <span id="charCount">0 characters</span>
+                                    <span>Max 2000 words</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>Scan for Bias</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Results & Explainability Panel -->
+                <div class="flex flex-col h-full">
+                    <!-- Empty State -->
+                    <div id="emptyState" class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col items-center justify-center text-center h-full transition-colors duration-300">
+                        <div class="bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-300 w-16 h-16 rounded-full flex items-center justify-center mb-4 text-2xl">
+                            <i class="fa-solid fa-chart-simple"></i>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800 dark:text-white mb-1">No Analysis Performed Yet</h3>
+                        <p class="text-sm text-slate-400 dark:text-slate-400 max-w-xs">Enter your text on the left and click "Scan for Bias" to view real-time insights.</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col items-center justify-center text-center h-full transition-colors duration-300">
+                        <div class="relative w-12 h-12 mb-4">
+                            <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-700"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin"></div>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800 dark:text-white mb-1">AI Engine Processing...</h3>
+                    </div>
+
+                    <!-- Active Results -->
+                    <div id="resultsPanel" class="hidden bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col h-full space-y-6 transition-colors duration-300">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Analysis Result</h2>
+                            </div>
+                            <div id="biasBadge"></div>
+                        </div>
+
+                        <div class="space-y-4 flex-grow">
+                            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-indigo-500 dark:text-indigo-400"></i>
+                                <span>AI Explainability Report</span>
+                            </h3>
+                            <div class="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 p-4 rounded-xl">
+                                <p id="explanationText" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"></p>
+                            </div>
+                            <div class="space-y-2.5 mt-4">
+                                <h4 class="text-xs font-semibold text-slate-600 dark:text-slate-400">Key Takeaways:</h4>
+                                <ul id="findingsList" class="text-sm text-slate-600 dark:text-slate-300 space-y-2"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: HOW IT WORKS (ABOUT) -->
+        <section id="about" class="min-h-screen flex items-center py-12 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 scroll-mt-20 transition-colors duration-300">
+            <div class="max-w-5xl mx-auto px-4 w-full">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-4">How Unbiasly AI Works</h2>
+                    <p class="text-base text-slate-500 dark:text-slate-400">Our platform bridges the gap between machine learning intelligence and human transparency, helping teams auditing copy minimize unintended bias.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-50 dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-lg dark:hover:shadow-indigo-900/20 transition-all">
+                        <div class="text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-xl">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-2">Bias Identification</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Scans text blocks instantly to highlight absolute generalizations, outgroup phrasing, and polarized syntactic choices.</p>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-lg dark:hover:shadow-indigo-900/20 transition-all">
+                        <div class="text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-xl">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-2">Context Metrics</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Evaluates semantic neutrality scores based on balanced journalism baseline datasets instead of basic emotion filters.</p>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-lg dark:hover:shadow-indigo-900/20 transition-all">
+                        <div class="text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-xl">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-2">Full Explainability</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">It doesn't just judge. The AI generates contextual explanations detailing *why* weights were adjusted against specific phrases.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 dark:bg-black text-slate-400 py-8 border-t border-slate-800 mt-auto">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="text-center mb-6">
+                <p class="text-sm text-white font-semibold">Unbiasly AI Development Team</p>
+            </div>
+            
+            <!-- Flex grid for the 4 team members -->
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs">
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-300 font-medium">Krishna Singhal</span>
+                    <span class="font-mono text-[10px] text-slate-500">Reg: 25BCE0509</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-300 font-medium">Ashutosh Pandey</span>
+                    <span class="font-mono text-[10px] text-slate-500">Reg: 25BDS0055</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-300 font-medium">Lakshya Vats</span>
+                    <span class="font-mono text-[10px] text-slate-500">Reg: 25BCE0642</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-300 font-medium">Sujal Mishra</span>
+                    <span class="font-mono text-[10px] text-slate-500">Reg: 25BDS0069</span>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8 text-[10px] text-slate-600">
+                &copy; 2026 All rights reserved.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
