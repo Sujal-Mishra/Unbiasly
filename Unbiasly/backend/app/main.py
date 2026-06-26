@@ -60,7 +60,20 @@ async def analyze_endpoint(request: AnalyzeRequest):
         
         heatmap = build_attention_heatmap(text, lime_explanation)
 
-        overall_score = min(100, round(biased_score))
+        # Gating: Extract maximum score from LLM semantic vectors
+        llm_max_score = max(
+            semantic_data.get("loaded_language", 0),
+            semantic_data.get("identity_bias", 0),
+            semantic_data.get("emotional_framing", 0),
+            semantic_data.get("toxicity_risk", 0)
+        )
+
+        # Apply gating logic: if the LLM shows very low/no semantic bias (< 15%), we cap/scale the local score.
+        # Otherwise, we use the higher of the two models' scores to ensure robust coverage.
+        if llm_max_score < 15:
+            overall_score = round(min(biased_score, llm_max_score))
+        else:
+            overall_score = min(100, round(max(biased_score, llm_max_score)))
 
         if overall_score >= 70:
             risk = "HIGH"
