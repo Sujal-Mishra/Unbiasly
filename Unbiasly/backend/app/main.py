@@ -68,12 +68,18 @@ async def analyze_endpoint(request: AnalyzeRequest):
             semantic_data.get("toxicity_risk", 0)
         )
 
-        # Apply gating logic: if the LLM shows very low/no semantic bias (< 15%), we cap/scale the local score.
-        # Otherwise, we use the higher of the two models' scores to ensure robust coverage.
-        if llm_max_score < 15:
-            overall_score = round(min(biased_score, llm_max_score))
-        else:
+        # Apply specific gating cases:
+        # Case 1: If LLM detects virtually no bias (< 5), force the score to be very low (cap at LLM max score)
+        if llm_max_score < 5:
+            overall_score = round(llm_max_score)
+        
+        # Case 2: If both LLM agrees (> 80) and BART agrees (> 70), take the maximum score
+        elif llm_max_score > 80 and biased_score > 70:
             overall_score = min(100, round(max(biased_score, llm_max_score)))
+            
+        # Case 3: For all other intermediate/moderate combinations, use a balanced average
+        else:
+            overall_score = min(100, round((biased_score + llm_max_score) / 2))
 
         if overall_score >= 70:
             risk = "HIGH"
