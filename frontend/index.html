@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unbiasly | Premium AI Bias Detection</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            safelist: [
+                'bg-rose-500/20', 'text-rose-400', 'border-rose-500', 
+                'bg-amber-500/20', 'text-amber-400', 'border-amber-500',
+                'bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500'
+            ],
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'rgb(var(--color-bg) / <alpha-value>)',
+                        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+                        surfaceLight: 'rgb(var(--color-surface-light) / <alpha-value>)',
+                        themeText: 'rgb(var(--color-text) / <alpha-value>)',
+                        textMuted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+                        themeBorder: 'rgb(var(--color-border) / <alpha-value>)',
+                        glassBg: 'rgb(var(--color-glass-bg) / <alpha-value>)',
+                        primary: '#10B981',
+                        primaryGlow: '#22C55E',
+                        secondary: '#06B6D4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scan': 'scan 2s linear infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
+                        },
+                        'scan': {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(1000%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-bg: 248 250 252;
+            --color-surface: 255 255 255;
+            --color-surface-light: 241 245 249;
+            --color-text: 15 23 42;
+            --color-text-muted: 71 85 105;
+            --color-border: 0 0 0;
+            --color-glass-bg: 255 255 255;
+        }
+
+        .dark {
+            --color-bg: 2 6 23;
+            --color-surface: 15 23 42;
+            --color-surface-light: 30 41 59;
+            --color-text: 255 255 255;
+            --color-text-muted: 148 163 184;
+            --color-border: 255 255 255;
+            --color-glass-bg: 15 23 42;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: rgb(var(--color-bg));
+            color: rgb(var(--color-text));
+            transition: background-color 0.3s ease, color 0.3s ease;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='s'%3E%3CfeDropShadow dx='0' dy='1' stdDeviation='1' flood-color='%23000' flood-opacity='0.2'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='%230F172A' stroke-width='2.5'/%3E%3Cline x1='18.5' y1='18.5' x2='24' y2='24' stroke='%230F172A' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") 14 14, auto;
+        }
+        
+        .dark body {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='s'%3E%3CfeDropShadow dx='0' dy='1' stdDeviation='1' flood-color='%23000' flood-opacity='0.6'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='%23F8FAFC' stroke-width='2.5'/%3E%3Cline x1='18.5' y1='18.5' x2='24' y2='24' stroke='%23F8FAFC' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") 14 14, auto;
+        }
+        
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .glass-panel {
+            background: rgb(var(--color-glass-bg) / 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgb(var(--color-border) / 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgb(var(--color-glass-bg) / 0.4);
+            border: 1px solid rgb(var(--color-border) / 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgb(var(--color-glass-bg) / 0.6);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.05);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
+        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        
+        .accordion-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 300px;
+            opacity: 1;
+        }
+
+        /* Heatmap Token Animation */
+        @keyframes fadeInToken {
+            0% { opacity: 0; transform: translateY(4px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .heatmap-token {
+            animation: fadeInToken 0.4s ease-out forwards;
+            opacity: 0;
+            display: inline-block;
+        }
+
+        /* Tooltip Container */
+        .tooltip-group .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        .tooltip-group:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Loading Scan Line */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.8), transparent);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            opacity: 0.6;
+            animation: scan 2s linear infinite;
+        }
+    </style>
+    <script>
+        // Check theme preference to prevent FOUC
+        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default
+        }
+    </script>
+</head>
+<body class="min-h-screen relative overflow-x-hidden selection:bg-primary/30 selection:text-primaryGlow">
+
+    <div class="fixed inset-0 z-[-1] bg-grid pointer-events-none"></div>
+    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] z-[-1] pointer-events-none"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[100px] z-[-1] pointer-events-none"></div>
+
+    <!-- 1. NAVBAR -->
+    <header class="fixed top-0 w-full z-50 glass-panel border-b-0 border-x-0 border-t-0 border-themeBorder/5">
+        <div class="max-w-[90vw] mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 group cursor-pointer">
+                <div class="relative w-10 h-10 flex items-center justify-center bg-surfaceLight rounded-xl border border-themeBorder/10 group-hover:border-primary/50 transition-colors duration-300">
+                    <i class="fa-solid fa-brain-circuit text-xl text-themeText group-hover:text-primaryGlow transition-colors"></i>
+                    <div class="absolute inset-0 bg-primary/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-themeText">Unbiasly<span class="text-primary">.ai</span></h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-textMuted">
+                    <a href="#analyzer" class="hover:text-themeText transition-colors relative group">
+                        Platform
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#features" class="hover:text-themeText transition-colors relative group">
+                        Capabilities
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#how-it-works" class="hover:text-themeText transition-colors relative group">
+                        Architecture
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                </nav>
+                <button id="themeToggleBtn" aria-label="Toggle Dark Mode" class="w-10 h-10 flex items-center justify-center rounded-xl bg-surfaceLight border border-themeBorder/10 hover:border-primary/50 text-textMuted hover:text-primaryGlow transition-colors duration-300">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full flex-grow pt-28 pb-12">
+        
+        <!-- LIVE SYSTEM STATUS -->
+        <div class="max-w-[90vw] mx-auto mb-8 flex flex-wrap justify-center lg:justify-start gap-4">
+            <div class="glass-card px-4 py-2 rounded-lg flex items-center space-x-2 border border-themeBorder/5 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-textMuted">Detection Engine Online</span>
+            </div>
+            <div class="glass-card px-4 py-2 rounded-lg flex items-center space-x-2 border border-themeBorder/5 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" style="animation-delay: 0.5s;"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+                </span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-textMuted">Explainability Layer Active</span>
+            </div>
+            <div class="glass-card px-4 py-2 rounded-lg flex items-center space-x-2 border border-themeBorder/5 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primaryGlow"></span>
+                </span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-textMuted">Semantic Thresholds Loaded</span>
+            </div>
+        </div>
+
+        <!-- 2. HERO ANALYZER SECTION -->
+        <section id="analyzer" class="max-w-[90vw] mx-auto mb-24">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Column: Typography & Trust -->
+                <div class="lg:col-span-5 flex flex-col pr-4">
+                    <h2 class="text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6 text-themeText mt-4">
+                        Detect Bias Before It Shapes <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Narratives.</span>
+                    </h2>
+                    
+                    <p class="text-lg text-textMuted leading-relaxed mb-10 max-w-lg">
+                        Explainable AI that identifies biased language, highlights problematic phrasing, and suggests neutral alternatives in real time. Built for editorial teams, researchers, and enterprises.
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <div class="flex items-center space-x-2 text-sm text-textMuted bg-surface border border-themeBorder/5 px-4 py-2 rounded-lg shadow-sm">
+                            <i class="fa-solid fa-microchip text-primary"></i>
+                            <span>Explainable AI</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-textMuted bg-surface border border-themeBorder/5 px-4 py-2 rounded-lg shadow-sm">
+                            <i class="fa-solid fa-scale-balanced text-secondary"></i>
+                            <span>Fairness Aware</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Analyzer Panel -->
+                <div class="lg:col-span-7 flex flex-col h-full w-full">
+                    
+                    <!-- Input State -->
+                    <div id="inputPanel" class="glass-panel p-6 rounded-2xl w-full h-full flex flex-col relative z-10 transition-all duration-500 shadow-xl border border-themeBorder/10 hover:border-themeBorder/20">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-themeText flex items-center space-x-2">
+                                <i class="fa-solid fa-terminal text-primary"></i>
+                                <span>Input Payload</span>
+                            </h3>
+                            <button id="resetBtn" type="button" class="text-xs text-textMuted hover:text-themeText bg-themeBorder/5 hover:bg-themeBorder/10 px-3 py-1.5 rounded-md transition-colors flex items-center space-x-1 border border-themeBorder/5">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+                        
+                        <form id="biasForm" class="flex flex-col flex-grow">
+                            <div class="relative flex-grow flex flex-col">
+                                <textarea id="textInput" class="w-full flex-grow min-h-[220px] p-5 bg-surfaceLight/30 border border-themeBorder/10 rounded-xl text-themeText placeholder-textMuted/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 focus:bg-surfaceLight/50 transition-all resize-none font-sans text-base leading-relaxed" placeholder="Paste article excerpts, opinion pieces, media narratives, or public statements for semantic bias inspection..." required></textarea>
+                                
+                                <div class="absolute bottom-4 right-4 flex items-center space-x-4">
+                                    <span id="charCount" class="text-xs font-mono text-textMuted">0 chars</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Sample Input Chips -->
+                            <div class="mt-4">
+                                <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-2">Sample Prompts</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="sample-chip bg-surface border border-themeBorder/10 hover:border-primary/40 hover:bg-primary/5 text-xs text-textMuted hover:text-themeText px-3 py-1.5 rounded-full transition-all duration-300" data-text="The media always manipulates public perception in favor of one ideology.">Political Commentary</button>
+                                    <button type="button" class="sample-chip bg-surface border border-themeBorder/10 hover:border-amber-500/40 hover:bg-amber-500/5 text-xs text-textMuted hover:text-themeText px-3 py-1.5 rounded-full transition-all duration-300" data-text="These people are always causing problems because their ideology is dangerous.">Identity Bias</button>
+                                    <button type="button" class="sample-chip bg-surface border border-themeBorder/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 text-xs text-textMuted hover:text-themeText px-3 py-1.5 rounded-full transition-all duration-300" data-text="The local city council approved the new zoning laws for the downtown district yesterday.">Neutral News</button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="submitBtn" class="mt-6 w-full relative group overflow-hidden rounded-xl p-[1px] shadow-lg">
+                                <span class="absolute inset-0 bg-gradient-to-r from-primary to-secondary animate-gradient-x opacity-80 group-hover:opacity-100 transition-opacity"></span>
+                                <div class="relative bg-surface px-4 py-4 rounded-xl flex items-center justify-center space-x-2 group-hover:bg-opacity-0 transition-all duration-300">
+                                    <i class="fa-solid fa-radar text-themeText"></i>
+                                    <span class="font-semibold text-themeText tracking-wide">Initialize Analysis</span>
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Loading Sequence -->
+                    <div id="loadingPanel" class="hidden glass-panel overflow-hidden p-12 rounded-2xl w-full flex-col items-center justify-center text-center h-[400px] relative z-10 transition-all duration-500 border border-primary/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                        <div class="scan-line"></div>
+                        <div class="relative w-20 h-20 mb-8">
+                            <div class="absolute inset-0 border-4 border-surfaceLight rounded-full"></div>
+                            <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <div class="absolute inset-0 border-4 border-secondary border-b-transparent rounded-full animate-[spin_1.5s_linear_infinite_reverse] opacity-50"></div>
+                            <i class="fa-solid fa-microchip absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-primaryGlow animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.5)]"></i>
+                        </div>
+                        <h3 id="loadingMessage" class="text-lg font-medium text-themeText tracking-wide transition-opacity duration-300">Initializing engine...</h3>
+                        <div class="w-48 h-1 bg-surfaceLight rounded-full mt-6 overflow-hidden">
+                            <div id="loadingProgress" class="h-full bg-gradient-to-r from-primary to-secondary w-0 transition-all ease-out"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div id="resultsPanel" class="hidden flex flex-col space-y-6 w-full transition-all duration-500">
+                        
+                        <!-- Actions Header -->
+                        <div class="flex items-center justify-between">
+                            <button id="backBtn" class="text-sm font-medium text-textMuted hover:text-themeText transition-colors flex items-center space-x-2 group bg-surface/50 px-4 py-2 rounded-lg border border-themeBorder/5 hover:border-themeBorder/20">
+                                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                                <span>New Analysis</span>
+                            </button>
+                            <button id="exportPdfBtn" class="bg-surfaceLight/50 hover:bg-surface border border-themeBorder/10 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm font-medium text-themeText py-2 px-4 rounded-lg transition-all flex items-center space-x-2 group">
+                                <i class="fa-solid fa-file-pdf text-rose-400 group-hover:scale-110 transition-transform"></i>
+                                <span>Export Report</span>
+                            </button>
+                        </div>
+
+                        <!-- Report Container (Target for PDF) -->
+                        <div id="pdfContainer" class="glass-panel p-6 sm:p-8 rounded-2xl w-full flex flex-col space-y-8 relative z-10 bg-background before:absolute before:inset-0 before:bg-surface/50 before:-z-10 before:rounded-2xl border border-themeBorder/10 shadow-2xl">
+                            
+                            <!-- Header / Badge -->
+                            <div class="flex items-center justify-between pb-6 border-b border-themeBorder/10">
+                                <div>
+                                    <h2 class="text-xl font-bold text-themeText tracking-tight flex items-center gap-2">
+                                        <i class="fa-solid fa-brain-circuit text-primary"></i>
+                                        Intelligence Report
+                                    </h2>
+                                    <p id="timestamp" class="text-xs font-mono text-textMuted mt-1"></p>
+                                </div>
+                                <div id="biasBadge"></div>
+                            </div>
+
+                            <!-- Dashboard Bento Box -->
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <!-- Overall Score -->
+                                <div class="md:col-span-4 glass-card p-5 rounded-xl flex flex-col items-center justify-center relative overflow-hidden group">
+                                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-colors"></div>
+                                    <span class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-2 flex items-center gap-1">
+                                        Overall Score
+                                    </span>
+                                    <div class="flex items-end space-x-2 mb-2">
+                                        <span id="overallScore" class="text-5xl font-black text-themeText">0</span>
+                                        <span class="text-lg text-textMuted font-medium mb-1">/ 100</span>
+                                    </div>
+                                    <span id="riskLabel" class="text-xs font-semibold px-3 py-1 rounded-full bg-surface border border-themeBorder/10 text-themeText">Calculating</span>
+                                </div>
+
+                                <!-- Category Metrics -->
+                                <div class="md:col-span-8 glass-card p-5 rounded-xl flex flex-col justify-between space-y-4 group">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs font-bold text-textMuted uppercase tracking-widest flex items-center gap-2">
+                                            Semantic Vectors
+                                            <div class="tooltip-group relative cursor-help inline-flex">
+                                                <i class="fa-solid fa-circle-info text-textMuted/50 hover:text-themeText transition-colors"></i>
+                                                <div class="tooltip-text absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-surfaceLight border border-themeBorder/10 rounded-lg text-[10px] text-slate-700 dark:text-slate-300 z-20 shadow-xl pointer-events-none">
+                                                    Confidence reflects model certainty, not factual correctness. (<span id="confidenceScore" class="text-primary font-bold">0</span>% confidence)
+                                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-surfaceLight"></div>
+                                                </div>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="relative">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-slate-700 dark:text-slate-300 font-medium">Loaded Language</span>
+                                                <span id="loadedScore" class="font-mono text-themeText">0%</span>
+                                            </div>
+                                            <div class="w-full bg-surface border border-themeBorder/5 rounded-full h-1.5 overflow-hidden"><div id="loadedBar" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div></div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between text-xs mb-1 flex items-center">
+                                                <span class="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-1">
+                                                    Identity Bias
+                                                    <div class="tooltip-group relative cursor-help inline-flex ml-1">
+                                                        <i class="fa-solid fa-circle-info text-textMuted/40 hover:text-themeText transition-colors text-[10px]"></i>
+                                                        <div class="tooltip-text absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-surfaceLight border border-themeBorder/10 rounded-lg text-[10px] text-slate-700 dark:text-slate-300 z-20 shadow-xl pointer-events-none">
+                                                            Measures references or framing targeting protected or social groups.
+                                                        </div>
+                                                    </div>
+                                                </span>
+                                                <span id="identityScore" class="font-mono text-themeText">0%</span>
+                                            </div>
+                                            <div class="w-full bg-surface border border-themeBorder/5 rounded-full h-1.5 overflow-hidden"><div id="identityBar" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;"></div></div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-slate-700 dark:text-slate-300 font-medium">Emotional Framing</span>
+                                                <span id="emotionalScore" class="font-mono text-themeText">0%</span>
+                                            </div>
+                                            <div class="w-full bg-surface border border-themeBorder/5 rounded-full h-1.5 overflow-hidden"><div id="emotionalBar" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;"></div></div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-slate-700 dark:text-slate-300 font-medium">Toxicity Risk</span>
+                                                <span id="toxicityScore" class="font-mono text-themeText">0%</span>
+                                            </div>
+                                            <div class="w-full bg-surface border border-themeBorder/5 rounded-full h-1.5 overflow-hidden"><div id="toxicityBar" class="bg-purple-500 h-1.5 rounded-full" style="width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explainability Report -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-textMuted uppercase tracking-widest flex items-center space-x-2">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-secondary"></i>
+                                        <span>Model Interpretation</span>
+                                    </h4>
+                                    <button class="copy-btn text-textMuted hover:text-themeText transition-colors flex items-center space-x-1 bg-themeBorder/5 hover:bg-themeBorder/10 px-2 py-1 rounded text-xs border border-themeBorder/5" data-target="explainabilityText">
+                                        <i class="fa-regular fa-copy"></i><span>Copy</span>
+                                    </button>
+                                </div>
+                                <div class="glass-card p-4 rounded-xl border-l-2 border-l-secondary hover:border-l-primary transition-colors">
+                                    <p id="explainabilityText" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"></p>
+                                </div>
+                            </div>
+
+                            <!-- Bias Heatmap -->
+                            <div class="space-y-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <h4 class="text-xs font-bold text-textMuted uppercase tracking-widest flex items-center space-x-2">
+                                        <i class="fa-solid fa-fire text-orange-500"></i>
+                                        <span>Attention Heatmap</span>
+                                    </h4>
+                                    <div class="flex space-x-4 text-[10px] text-textMuted font-medium">
+                                        <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500/20 border border-rose-500 mr-1.5 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></span> Highly Biased</span>
+                                        <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500/20 border border-amber-500 mr-1.5 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> Suspicious</span>
+                                        <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500/20 border border-emerald-500 mr-1.5"></span> Neutral</span>
+                                    </div>
+                                </div>
+                                <div class="glass-card p-5 rounded-xl text-sm text-themeText leading-loose tracking-wide font-medium border border-themeBorder/5" id="heatmapContent">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Sentence Analysis Accordions -->
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-bold text-textMuted uppercase tracking-widest flex items-center space-x-2">
+                                    <i class="fa-solid fa-layer-group text-primary"></i>
+                                    <span>Sentence Vectors</span>
+                                </h4>
+                                <div id="sentenceList" class="space-y-2">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Neutral Rewrite -->
+                            <div id="rewriteSection" class="hidden pt-6 border-t border-themeBorder/10">
+                                <button id="revealRewriteBtn" type="button" class="w-full relative group overflow-hidden rounded-xl p-[1px] mb-4 shadow-lg">
+                                    <span class="absolute inset-0 bg-themeBorder/10 group-hover:bg-primary/20 transition-colors"></span>
+                                    <div class="relative bg-surfaceLight px-4 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all border border-themeBorder/5 group-hover:border-primary/30">
+                                        <i class="fa-solid fa-pen-nib text-primary group-hover:text-primaryGlow transition-colors"></i>
+                                        <span class="text-sm font-semibold text-themeText tracking-wide">Generate Neutral Rewrite</span>
+                                    </div>
+                                </button>
+                                
+                                <div id="rewriteOutput" class="accordion-content glass-card rounded-xl border border-primary/30 relative">
+                                    <div class="p-6 pt-7">
+                                        <div class="absolute -top-2.5 left-5 bg-[#0F172A] border border-primary/50 text-primaryGlow text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-[0_0_10px_rgba(16,185,129,0.2)]">Target Output</div>
+                                        <button class="copy-btn absolute top-3 right-3 text-textMuted hover:text-themeText transition-colors flex items-center space-x-1 bg-themeBorder/5 hover:bg-themeBorder/10 px-2 py-1 rounded text-xs border border-themeBorder/5" data-target="rewriteText">
+                                            <i class="fa-regular fa-copy"></i><span>Copy</span>
+                                        </button>
+                                        <p id="rewriteText" class="text-sm text-emerald-800 dark:text-emerald-50 leading-relaxed font-medium mt-1 pr-12"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. FEATURE SHOWCASE (Bento Grid) -->
+        <section id="features" class="max-w-[90vw] mx-auto py-24 border-t border-themeBorder/5 relative">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-themeText mb-4">Unprecedented Transparency</h2>
+                <p class="text-textMuted max-w-2xl mx-auto">We don't just output a black-box score. We map exactly why an algorithm flagged text, bridging the gap between machine intelligence and editorial oversight.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-2xl md:col-span-2 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-lg hover:shadow-orange-500/10">
+                    <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-fire text-9xl text-orange-500 transform translate-x-4 translate-y-4"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-surface border border-themeBorder/10 group-hover:border-orange-500/30 rounded-xl flex items-center justify-center mb-6 transition-colors">
+                        <i class="fa-solid fa-fire text-xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-themeText mb-2">Attention Heatmaps</h3>
+                    <p class="text-sm text-textMuted leading-relaxed max-w-md">Our NLP models highlight specific problematic tokens, classifying them into severity tiers so you know exactly which words triggered the bias threshold.</p>
+                </div>
+                
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-lg hover:shadow-rose-400/10">
+                    <div class="w-12 h-12 bg-surface border border-themeBorder/10 group-hover:border-rose-400/30 rounded-xl flex items-center justify-center mb-6 transition-colors">
+                        <i class="fa-solid fa-file-pdf text-xl text-rose-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-themeText mb-2">Exportable Audits</h3>
+                    <p class="text-sm text-textMuted leading-relaxed">Generate instant PDF reports to document compliance and editorial reviews.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-lg hover:shadow-secondary/10">
+                    <div class="w-12 h-12 bg-surface border border-themeBorder/10 group-hover:border-secondary/30 rounded-xl flex items-center justify-center mb-6 transition-colors">
+                        <i class="fa-solid fa-layer-group text-xl text-secondary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-themeText mb-2">Sentence Vectors</h3>
+                    <p class="text-sm text-textMuted leading-relaxed">Granular breakdown isolates identity framing and emotional manipulation per sentence.</p>
+                </div>
+                
+                <div class="glass-card p-8 rounded-2xl md:col-span-2 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 shadow-lg hover:shadow-primary/10">
+                    <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-pen-nib text-9xl text-primary transform translate-x-4 translate-y-4"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-surface border border-themeBorder/10 group-hover:border-primary/30 rounded-xl flex items-center justify-center mb-6 transition-colors">
+                        <i class="fa-solid fa-pen-nib text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-themeText mb-2">Generative Neutralization</h3>
+                    <p class="text-sm text-textMuted leading-relaxed max-w-md">With a single click, our generative layer restructures biased narratives into objective, factual reporting without losing the core informational payload.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. HOW IT WORKS -->
+        <section id="how-it-works" class="max-w-[90vw] mx-auto py-24 border-t border-themeBorder/5">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-themeText mb-4">Architecture Flow</h2>
+            </div>
+            
+            <div id="architecture-flow-container" class="flex flex-col md:flex-row items-center justify-center gap-4 relative group/container">
+                <!-- Dynamic Content Will Be Injected Here via JS -->
+            </div>
+        </section>
+
+        <!-- POWERED BY BADGES -->
+        <section class="max-w-[90vw] mx-auto py-12 border-t border-themeBorder/5 text-center">
+            <p class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-6">Powered by Modern AI Stack</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <div class="px-3 py-1.5 rounded-md bg-surface border border-themeBorder/5 text-xs text-textMuted font-mono">DistilBERT</div>
+                <div class="px-3 py-1.5 rounded-md bg-surface border border-themeBorder/5 text-xs text-textMuted font-mono">LoRA</div>
+                <div class="px-3 py-1.5 rounded-md bg-surface border border-themeBorder/5 text-xs text-textMuted font-mono">LIME</div>
+                <div class="px-3 py-1.5 rounded-md bg-surface border border-themeBorder/5 text-xs text-textMuted font-mono">Transformers</div>
+                <div class="px-3 py-1.5 rounded-md bg-surface border border-themeBorder/5 text-xs text-textMuted font-mono">PEFT</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 5. FOOTER -->
+    <footer class="border-t border-themeBorder/5 bg-surface/50 backdrop-blur-sm pt-12 pb-8">
+        <div class="max-w-[90vw] mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+                <div class="flex items-center space-x-3 mb-6 md:mb-0 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+                    <i class="fa-solid fa-brain-circuit text-xl text-themeText"></i>
+                    <h1 class="text-lg font-bold tracking-tight text-themeText">Unbiasly<span class="text-primary">.ai</span></h1>
+                </div>
+                
+                <div class="flex space-x-6 text-textMuted">
+                    <a href="#" class="hover:text-themeText transition-colors"><i class="fa-brands fa-github text-xl"></i></a>
+                    <a href="#" class="hover:text-themeText transition-colors"><i class="fa-brands fa-twitter text-xl"></i></a>
+                    <a href="#" class="hover:text-themeText transition-colors"><i class="fa-brands fa-discord text-xl"></i></a>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-xs font-bold text-textMuted tracking-widest uppercase mb-6">Engineering Team</p>
+                <div class="flex flex-wrap justify-center gap-x-6 gap-y-4">
+                    <div class="glass-card px-4 py-2 rounded-xl flex items-center space-x-3 hover:-translate-y-0.5 hover:shadow-lg transition-all border border-themeBorder/5 hover:border-primary/20">
+                        <div class="w-8 h-8 rounded-full bg-surfaceLight flex items-center justify-center text-xs font-bold text-themeText shadow-inner">KS</div>
+                        <div class="text-left">
+                            <p class="text-sm text-themeText font-medium leading-tight">Krishna Singhal</p>
+                            <p class="text-[10px] font-mono text-textMuted leading-tight mt-0.5">25BCE0509</p>
+                        </div>
+                    </div>
+                    <div class="glass-card px-4 py-2 rounded-xl flex items-center space-x-3 hover:-translate-y-0.5 hover:shadow-lg transition-all border border-themeBorder/5 hover:border-primary/20">
+                        <div class="w-8 h-8 rounded-full bg-surfaceLight flex items-center justify-center text-xs font-bold text-themeText shadow-inner">AP</div>
+                        <div class="text-left">
+                            <p class="text-sm text-themeText font-medium leading-tight">Ashutosh Pandey</p>
+                            <p class="text-[10px] font-mono text-textMuted leading-tight mt-0.5">25BDS0055</p>
+                        </div>
+                    </div>
+                    <div class="glass-card px-4 py-2 rounded-xl flex items-center space-x-3 hover:-translate-y-0.5 hover:shadow-lg transition-all border border-themeBorder/5 hover:border-primary/20">
+                        <div class="w-8 h-8 rounded-full bg-surfaceLight flex items-center justify-center text-xs font-bold text-themeText shadow-inner">LV</div>
+                        <div class="text-left">
+                            <p class="text-sm text-themeText font-medium leading-tight">Lakshya Vats</p>
+                            <p class="text-[10px] font-mono text-textMuted leading-tight mt-0.5">25BCE0642</p>
+                        </div>
+                    </div>
+                    <div class="glass-card px-4 py-2 rounded-xl flex items-center space-x-3 hover:-translate-y-0.5 hover:shadow-lg transition-all border border-themeBorder/5 hover:border-primary/20">
+                        <div class="w-8 h-8 rounded-full bg-surfaceLight flex items-center justify-center text-xs font-bold text-themeText shadow-inner">SM</div>
+                        <div class="text-left">
+                            <p class="text-sm text-themeText font-medium leading-tight">Sujal Mishra</p>
+                            <p class="text-[10px] font-mono text-textMuted leading-tight mt-0.5">25BDS0069</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 text-[10px] text-textMuted/50">
+                &copy; 2026 Unbiasly AI. All rights reserved. Built for hackathon demonstration.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Action Menu (FAM) -->
+    <div id="selectionFam" class="fixed z-50 hidden opacity-0 transition-opacity duration-200 pointer-events-auto transform -translate-x-1/2 -translate-y-full pb-2">
+        <div class="glass-panel rounded-xl shadow-2xl border border-themeBorder/10 flex items-center p-1 space-x-1 backdrop-blur-xl bg-surface/90">
+            <button class="fam-btn hover:bg-surfaceLight border border-transparent hover:border-themeBorder/5 text-textMuted hover:text-primary transition-all px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2" data-action="scan">
+                <i class="fa-solid fa-radar"></i>
+                <span>Scan Bias</span>
+            </button>
+            <div class="w-px h-4 bg-themeBorder/10"></div>
+            <button class="fam-btn hover:bg-surfaceLight border border-transparent hover:border-themeBorder/5 text-textMuted hover:text-amber-500 transition-all px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2" data-action="explain">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Explain Context</span>
+            </button>
+            <div class="w-px h-4 bg-themeBorder/10"></div>
+            <button class="fam-btn hover:bg-surfaceLight border border-transparent hover:border-themeBorder/5 text-textMuted hover:text-emerald-500 transition-all px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2" data-action="neutralize">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Neutralize</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-3 pointer-events-none">
+        <!-- Toasts injected here -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
