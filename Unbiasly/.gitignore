@@ -1,0 +1,44 @@
+# Python virtual environments
+backend/venv/
+backend/.venv/
+venv/
+.venv/
+
+# Environment files (strictly exclude credentials!)
+backend/.env
+.env
+
+# Python compilation caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS temporary files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ML local cached weights
+backend/app/models/zero_shot/
+**/models/zero_shot/
+
+# Ignore documentation binaries and Windows shortcuts
+*.lnk
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+
+
