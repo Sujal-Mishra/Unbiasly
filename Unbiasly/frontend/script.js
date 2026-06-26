@@ -264,9 +264,11 @@ form.addEventListener('submit', async (e) => {
     }, 800);
 
     try {
-        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:8000' 
-            : '';
+        const apiHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8000'
+            : (window.location.hostname.endsWith('hf.space') || window.location.hostname.endsWith('huggingface.co'))
+                ? ''
+                : 'https://tudal-unbiasly.hf.space';
         const response = await fetch(`${apiHost}/api/v1/analyze`, {
             method: 'POST',
             headers: {
