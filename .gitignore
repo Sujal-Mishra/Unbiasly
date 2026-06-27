@@ -28,3 +28,7 @@ desktop.ini
 *.ntvs*
 *.njsproj
 *.sln
+
+# AG Kit Agent & Temp files
+.agents/
+.temp_ag_kit/
